@@ -1,4 +1,4 @@
-"""Part 4 tests: Windows 11 Remote Control Mode, `agy --remote-agent`, Web Relay, Instance Switcher."""
+"""Part 4 tests: Windows 11 Remote Control, `agy --remote-agent`, Web Relay, Instance Switcher."""
 
 import pytest
 
@@ -85,7 +85,12 @@ def test_switch_freely_between_pure_cloud_and_windows_pc(
     relay = WebRelay()
 
     assert (
-        signed_in_pwa.switch_instance(ExecutionMode.REMOTE_CONTROL, relay=relay, workstation=workstation)
+        signed_in_pwa.switch_instance(
+            ExecutionMode.REMOTE_CONTROL, relay=relay, workstation=workstation
+        )
         == ExecutionMode.REMOTE_CONTROL
     )
-    assert signed_in_pwa.switch_instance(ExecutionMode.REMOTE_CONVERSATIONS) == ExecutionMode.REMOTE_CONVERSATIONS
+    assert (
+        signed_in_pwa.switch_instance(ExecutionMode.REMOTE_CONVERSATIONS)
+        == ExecutionMode.REMOTE_CONVERSATIONS
+    )

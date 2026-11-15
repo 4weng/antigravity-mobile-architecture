@@ -44,12 +44,19 @@ Python simulation and `pytest` verification suite modeling the **Google Antigrav
 
 ## Quick Start
 
-Create a virtual environment, install `pytest`, run the tests, and execute the simulation:
+Create a virtual environment, install dev tools (`pytest`, `ruff`, `mypy`), run checks and tests, and execute the simulation:
 
 ```bash
 uv venv .venv
 source .venv/bin/activate
 uv pip install -e ".[dev]"
+ruff check .
+ruff format --check .
+mypy src tests
 pytest
 python -m antigravity_mobile
 ```
+
+## License
+
+Licensed under the [MIT License](LICENSE).

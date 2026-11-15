@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 
-class DeviceHardware(str, Enum):
+class DeviceHardware(StrEnum):
     """Hardware target evaluated by Google Play Store filters."""
 
     ANDROID_SMARTPHONE = "android_smartphone"
     GOOGLEBOOK = "googlebook"
 
 
-class SubscriptionPlan(str, Enum):
+class SubscriptionPlan(StrEnum):
     """Google Account subscription tier for Pure Cloud Remote Agents."""
 
     FREE = "free"
@@ -21,7 +21,7 @@ class SubscriptionPlan(str, Enum):
     GOOGLE_AI_ULTRA = "google_ai_ultra"
 
 
-class ModelTier(str, Enum):
+class ModelTier(StrEnum):
     """Model tier roles described in Part 3 of the manual."""
 
     ARGON = "Argon"
@@ -49,21 +49,21 @@ class ModelTier(str, Enum):
         return analogies[self]
 
 
-class ExecutionMode(str, Enum):
+class ExecutionMode(StrEnum):
     """Execution targets switched via the Top Bar Instance Switcher (Part 4)."""
 
     REMOTE_CONVERSATIONS = "remote_conversations"  # Pure Cloud (Remote Agents)
     REMOTE_CONTROL = "remote_control"  # Windows 11 Home PC Workstation
 
 
-class ResourceType(str, Enum):
+class ResourceType(StrEnum):
     """Cloud connector resource types bound to a Remote Project (Part 2)."""
 
     GITHUB_REPO = "github_repo"
     GOOGLE_DRIVE = "google_drive"
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     """Lifecycle states of an asynchronous cloud task (Part 3)."""
 
     QUEUED = "queued"

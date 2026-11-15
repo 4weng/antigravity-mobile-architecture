@@ -29,5 +29,6 @@ def test_full_end_to_end_simulation_demo() -> None:
     assert report.remote_control_result.workload_name == "drone-crack-inspection"
     assert report.remote_control_result.bandwidth_mode == "lightweight_command_relay"
 
-    # Push notifications: Argon complete + Hydrogen approval + Hydrogen complete + Opus complete + Remote Control complete
+    # Push notifications: Argon complete, Hydrogen approval & complete,
+    # Opus complete, and Remote Control complete
     assert report.push_notifications_received == 5

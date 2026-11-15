@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .cloud_project import CloudTask, IsolatedCloudSandbox, NonBlockingDispatcher, RemoteProject
+from .cloud_project import CloudTask, NonBlockingDispatcher, RemoteProject
 from .models import (
     DeviceHardware,
     ExecutionMode,
@@ -42,10 +42,16 @@ class AntigravityMobileSimulator:
     workstation: Windows11Workstation = field(
         default_factory=lambda: Windows11Workstation(
             hostname="civil-eng-win11-ws",
-            spec=WorkstationSpec(os_name="Windows 11", ram_gb=128, gpu_name="NVIDIA RTX", vram_gb=16),
+            spec=WorkstationSpec(
+                os_name="Windows 11", ram_gb=128, gpu_name="NVIDIA RTX", vram_gb=16
+            ),
             local_files={
-                r"D:\drone_inspections\tower_b_cracks.raw": "High-res drone crack inspection images",
-                r"D:\models\ChindaMT-4B\weights.safetensors": "Local ChindaMT-4B translation weights",
+                r"D:\drone_inspections\tower_b_cracks.raw": (
+                    "High-res drone crack inspection images"
+                ),
+                r"D:\models\ChindaMT-4B\weights.safetensors": (
+                    "Local ChindaMT-4B translation weights"
+                ),
             },
         )
     )
@@ -134,12 +140,23 @@ def main() -> None:
     sim = AntigravityMobileSimulator()
     report = sim.run_full_demo()
     print("=== Antigravity Mobile Architecture Simulation ===")
-    print(f"Part 1 - Play Store APK blocked on Android phone: {report.play_store_blocked_on_smartphone}")
-    print(f"Part 2 - Chrome PWA installed: {report.pwa_installed} (fullscreen={report.fullscreen_ui})")
+    print(
+        "Part 1 - Play Store APK blocked on Android phone: "
+        f"{report.play_store_blocked_on_smartphone}"
+    )
+    print(
+        f"Part 2 - Chrome PWA installed: {report.pwa_installed} (fullscreen={report.fullscreen_ui})"
+    )
     print(f"Part 2 - Remote Resources: {report.remote_project_resources}")
     for task in report.cloud_tasks:
-        print(f"Part 3 - [{task.model_tier.value}] status={task.status.value} -> {task.output_summary}")
-    print(f"Part 4 - Remote Control ({report.remote_control_result.bandwidth_mode}): {report.remote_control_result.output_summary}")
+        print(
+            f"Part 3 - [{task.model_tier.value}] status={task.status.value} "
+            f"-> {task.output_summary}"
+        )
+    print(
+        f"Part 4 - Remote Control ({report.remote_control_result.bandwidth_mode}): "
+        f"{report.remote_control_result.output_summary}"
+    )
     print(f"Total Mobile Push Notifications received: {report.push_notifications_received}")
 
 

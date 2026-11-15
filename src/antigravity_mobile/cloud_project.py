@@ -27,7 +27,7 @@ class RemoteProject:
     resources: list[ProjectResource] = field(default_factory=list)
 
     def attach_github_repo(self, repo_slug: str, oauth_connected: bool = True) -> ProjectResource:
-        """Attach a GitHub repository (e.g., '4weng/antigravity-mobile-architecture') to Resources."""
+        """Attach a GitHub repository (e.g., '4weng/antigravity-mobile-architecture')."""
         resource = ProjectResource(
             resource_type=ResourceType.GITHUB_REPO,
             name=repo_slug,
@@ -135,7 +135,8 @@ class IsolatedCloudSandbox:
             task.branch_name = task.branch_name or f"feat/{task.task_id}"
             task.output_summary = (
                 f"[Hydrogen | {task.model_tier.civil_engineering_analogy}] "
-                f"Implemented branch '{task.branch_name}' for '{task.prompt}' using [{resource_names}]."
+                f"Implemented branch '{task.branch_name}' for '{task.prompt}' "
+                f"using [{resource_names}]."
             )
         else:
             task.output_summary = (
