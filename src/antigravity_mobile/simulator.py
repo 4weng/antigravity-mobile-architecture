@@ -15,6 +15,7 @@ from .models import (
 )
 from .pwa_client import ANTIGRAVITY_WEB_URL, AndroidChromePWA, GoogleAccount, PlayStoreFilter
 from .remote_control import WebRelay, Windows11Workstation
+from .skill_guidance import EvalBenchmarkResult, EvalTask, GuidanceEvalHarness, SkillPack
 
 
 @dataclass
@@ -28,6 +29,7 @@ class SimulationReport:
     cloud_tasks: list[CloudTask]
     remote_control_result: WorkloadResult
     push_notifications_received: int
+    guidance_eval: EvalBenchmarkResult | None = None
 
 
 @dataclass
@@ -39,6 +41,7 @@ class AntigravityMobileSimulator:
     )
     dispatcher: NonBlockingDispatcher = field(default_factory=NonBlockingDispatcher)
     relay: WebRelay = field(default_factory=WebRelay)
+    skill_pack: SkillPack = field(default_factory=SkillPack)
     workstation: Windows11Workstation = field(
         default_factory=lambda: Windows11Workstation(
             hostname="civil-eng-win11-ws",
@@ -57,7 +60,7 @@ class AntigravityMobileSimulator:
     )
 
     def run_full_demo(self) -> SimulationReport:
-        """Execute Parts 1–4 sequentially and return a structured report."""
+        """Execute Parts 1–4 plus modern-web-guidance Skill Pack evaluation."""
         # Part 1: Verify Play Store APK lock on standard Android smartphone
         play_store_blocked = not PlayStoreFilter.check_apk_eligibility(self.pwa.device)
 
@@ -80,8 +83,10 @@ class AntigravityMobileSimulator:
         plan_task = self.dispatcher.dispatch(
             pwa=self.pwa,
             project=project,
-            prompt="Design seismic frame module architecture",
+            prompt="Design seismic frame module architecture with PWA push",
             model_tier=ModelTier.ARGON,
+            skill_pack=self.skill_pack,
+            guide_query="pwa service worker push",
         )
         # Engineer closes Chrome & locks phone while cloud continues running!
         self.pwa.close_chrome_and_lock_screen()
@@ -124,6 +129,39 @@ class AntigravityMobileSimulator:
             service_worker=self.pwa.service_worker,
         )
 
+        # Skill Pack Eval Harness (modern-web-guidance closed-loop calibration & uplift)
+        eval_tasks = [
+            EvalTask(
+                task_id="eval-dialog",
+                prompt="confirm before deleting structural model",
+                guide_id="light-dismiss-dialog",
+                golden_code="<dialog>showModal() closedby-click-backdrop</dialog>",
+                unmodified_base_code="<div role='dialog'>Confirm</div>",
+            ),
+            EvalTask(
+                task_id="eval-css-has",
+                prompt="highlight invalid form group without JS",
+                guide_id="css-has-parent-selector",
+                golden_code=".field:has(:invalid) { border-color: red; }",
+                unmodified_base_code=".field.invalid { border-color: red; }",
+            ),
+        ]
+        harness = GuidanceEvalHarness(skill_pack=self.skill_pack)
+        harness.calibrate(eval_tasks)
+        guidance_eval = harness.run_benchmark(
+            agent_name="antigravity_cli",
+            model_tier=ModelTier.ARGON,
+            tasks=eval_tasks,
+            unguided_outputs={
+                "eval-dialog": eval_tasks[0].unmodified_base_code,
+                "eval-css-has": eval_tasks[1].golden_code,
+            },
+            guided_outputs={
+                "eval-dialog": eval_tasks[0].golden_code,
+                "eval-css-has": eval_tasks[1].golden_code,
+            },
+        )
+
         return SimulationReport(
             play_store_blocked_on_smartphone=play_store_blocked,
             pwa_installed=self.pwa.installed_to_home_screen,
@@ -132,6 +170,7 @@ class AntigravityMobileSimulator:
             cloud_tasks=[plan_task, code_task, review_task],
             remote_control_result=rc_result,
             push_notifications_received=len(self.pwa.service_worker.notifications),
+            guidance_eval=guidance_eval,
         )
 
 
@@ -157,6 +196,12 @@ def main() -> None:
         f"Part 4 - Remote Control ({report.remote_control_result.bandwidth_mode}): "
         f"{report.remote_control_result.output_summary}"
     )
+    if report.guidance_eval is not None:
+        ev = report.guidance_eval
+        print(
+            f"Skill Pack ({sim.skill_pack.name}): {ev.unguided_pass_rate_pct:.0f}% -> "
+            f"{ev.guided_pass_rate_pct:.0f}% (+{ev.uplift_pp:.0f}pp uplift)"
+        )
     print(f"Total Mobile Push Notifications received: {report.push_notifications_received}")
 
 

@@ -16,6 +16,7 @@ from .models import (
     TaskStatus,
 )
 from .pwa_client import AndroidChromePWA, ServiceWorker
+from .skill_guidance import SkillPack
 
 
 @dataclass
@@ -81,6 +82,9 @@ class CloudTask:
     output_summary: str = ""
     websocket_bound: bool = False
     requires_home_pc: bool = False
+    guided_by_skill: str | None = None
+    applied_guide_ids: list[str] = field(default_factory=list)
+    disclosure_markdown: str = ""
 
 
 @dataclass
@@ -144,6 +148,10 @@ class IsolatedCloudSandbox:
                 f"Reviewed and verified code correctness for '{task.prompt}'."
             )
 
+        if task.guided_by_skill and task.applied_guide_ids:
+            guides_joined = ", ".join(task.applied_guide_ids)
+            task.output_summary += f" [Guided by {task.guided_by_skill}: {guides_joined}]"
+
         task.status = TaskStatus.COMPLETED
         if service_worker is not None and service_worker.active:
             service_worker.receive_push(
@@ -184,11 +192,15 @@ class NonBlockingDispatcher:
         requires_approval: bool = False,
         branch_name: str | None = None,
         auto_run: bool = True,
+        skill_pack: SkillPack | None = None,
+        guide_query: str | None = None,
     ) -> CloudTask:
         """Dispatch a non-blocking task.
 
         The mobile client may immediately close Chrome or lock its screen after
         dispatch because execution occurs in Google's Isolated Cloud Sandbox.
+        When `skill_pack` is supplied, progressive-disclosure search & retrieve
+        attaches relevant modern web guidance to the task.
         """
         if pwa.signed_in_account is None:
             raise PWARequirementError("Sign in to antigravity.google.com before dispatching tasks.")
@@ -203,6 +215,15 @@ class NonBlockingDispatcher:
                 "(attach GitHub repo or Google Drive first)."
             )
 
+        applied_guide_ids: list[str] = []
+        disclosure = ""
+        if skill_pack is not None:
+            query = guide_query or prompt
+            matched = skill_pack.search(query)
+            retrieved = skill_pack.retrieve([item["id"] for item in matched])
+            applied_guide_ids = [g.guide_id for g in retrieved]
+            disclosure = skill_pack.format_disclosure(retrieved)
+
         task = CloudTask(
             task_id=f"task-{uuid.uuid4().hex[:8]}",
             project_id=project.project_id,
@@ -213,6 +234,9 @@ class NonBlockingDispatcher:
             branch_name=branch_name,
             websocket_bound=False,
             requires_home_pc=False,
+            guided_by_skill=skill_pack.name if skill_pack is not None else None,
+            applied_guide_ids=applied_guide_ids,
+            disclosure_markdown=disclosure,
         )
         if auto_run:
             return self.sandbox.execute(

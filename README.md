@@ -20,6 +20,9 @@ Python simulation and `pytest` verification suite modeling the **Google Antigrav
    - Enable on home PC via Antigravity Desktop App or `agy --remote-agent`.
    - Switch between **Remote Conversations (Pure Cloud)** and **Windows PC Workstation** via the Top Bar **Instance Switcher**.
    - Dispatches lightweight commands through **Web Relay** (no heavy RDP pixel streaming) to access local disk files and local workstation hardware (e.g., `128 GB RAM`, `NVIDIA 16 GB VRAM` for `ChindaMT-4B` or drone crack inspection).
+5. **Skill Pack & Closed-Loop Eval Harness (`modern-web-guidance` Principles)** ([`skill_guidance.py`](src/antigravity_mobile/skill_guidance.py))
+   - Inspired by [`GoogleChrome/modern-web-guidance`](https://github.com/GoogleChrome/modern-web-guidance) (`npx modern-web-guidance@latest install`).
+   - Models **Progressive Disclosure** (`SKILL.md` ~205-token index -> `search` -> `retrieve` -> `verify` -> disclosure), **Baseline Fallback Policy**, `legacy-scan` with `dropWhen` fallback filtering, and **Closed-Loop Eval Calibration** (Golden 100% / Base 0% + Unguided vs. Guided Uplift).
 
 ## Project Structure
 
@@ -29,16 +32,19 @@ Python simulation and `pytest` verification suite modeling the **Google Antigrav
 ├── src/
 │   └── antigravity_mobile/
 │       ├── __init__.py
+│       ├── __main__.py
 │       ├── models.py
 │       ├── pwa_client.py
 │       ├── cloud_project.py
 │       ├── remote_control.py
+│       ├── skill_guidance.py
 │       └── simulator.py
 └── tests/
     ├── test_part1_pwa_and_playstore.py
     ├── test_part2_setup_and_resources.py
     ├── test_part3_non_blocking_dispatch.py
     ├── test_part4_remote_control_switcher.py
+    ├── test_modern_web_guidance.py
     └── test_end_to_end_workflows.py
 ```
 

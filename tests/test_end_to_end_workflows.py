@@ -32,3 +32,10 @@ def test_full_end_to_end_simulation_demo() -> None:
     # Push notifications: Argon complete, Hydrogen approval & complete,
     # Opus complete, and Remote Control complete
     assert report.push_notifications_received == 5
+
+    # Skill Pack & Eval Harness (modern-web-guidance principles)
+    assert report.cloud_tasks[0].guided_by_skill == "modern-web-guidance"
+    assert "pwa-service-worker-push" in report.cloud_tasks[0].applied_guide_ids
+    assert report.guidance_eval is not None
+    assert report.guidance_eval.guided_pass_rate_pct == 100.0
+    assert report.guidance_eval.uplift_pp == 50.0
