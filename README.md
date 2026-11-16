@@ -24,9 +24,14 @@ Python simulation and `pytest` verification suite modeling the **Google Antigrav
    - Inspired by [`GoogleChrome/modern-web-guidance`](https://github.com/GoogleChrome/modern-web-guidance) (`npx modern-web-guidance@latest install`).
    - Models **Progressive Disclosure** (`SKILL.md` ~205-token index -> `search` -> `retrieve` -> `verify` -> disclosure), **Baseline Fallback Policy**, `legacy-scan` with `dropWhen` fallback filtering, and **Closed-Loop Eval Calibration** (Golden 100% / Base 0% + Unguided vs. Guided Uplift).
 
+6. **Installed Skill Pack & Interactive Web Companion** ([`.agents/skills/modern-web-guidance`](.agents/skills/modern-web-guidance), [`web/index.html`](web/index.html))
+   - Installed directly via `npx modern-web-guidance@latest install` (209 guides bundled for Antigravity and other coding agents).
+   - Interactive web companion built using retrieved `modern-web-guidance` patterns (`dark-mode`, `responsive-table`, `light-dismiss-a-dialog`, `declarative-dialog-popover-control`).
+
 ## Project Structure
 
 ```text
+├── .agents/skills/modern-web-guidance/  # Installed GoogleChrome/modern-web-guidance skill pack
 ├── docs/
 │   └── architecture_summary.md
 ├── src/
@@ -39,12 +44,15 @@ Python simulation and `pytest` verification suite modeling the **Google Antigrav
 │       ├── remote_control.py
 │       ├── skill_guidance.py
 │       └── simulator.py
+├── web/
+│   └── index.html
 └── tests/
     ├── test_part1_pwa_and_playstore.py
     ├── test_part2_setup_and_resources.py
     ├── test_part3_non_blocking_dispatch.py
     ├── test_part4_remote_control_switcher.py
     ├── test_modern_web_guidance.py
+    ├── test_web_companion.py
     └── test_end_to_end_workflows.py
 ```
 

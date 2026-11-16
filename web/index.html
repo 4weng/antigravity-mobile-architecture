@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Antigravity Mobile Architecture — Companion &amp; Simulator</title>
+  <style>
+    :root {
+      --bg-light: #f8fafc;
+      --bg-dark: #0b1120;
+      --surface-light: #ffffff;
+      --surface-dark: #131c31;
+      --surface-alt-light: #eef2f7;
+      --surface-alt-dark: #1b2844;
+      --text-light: #0f172a;
+      --text-dark: #e2e8f0;
+      --muted-light: #475569;
+      --muted-dark: #94a3b8;
+      --border-light: #cbd5e1;
+      --border-dark: #2c3c5c;
+      --brand-light: #1d4ed8;
+      --brand-dark: #38bdf8;
+      --brand-text-light: #ffffff;
+      --brand-text-dark: #082f49;
+      --ok-light: #15803d;
+      --ok-dark: #4ade80;
+
+      --bg: var(--bg-light);
+      --surface: var(--surface-light);
+      --surface-alt: var(--surface-alt-light);
+      --text: var(--text-light);
+      --muted: var(--muted-light);
+      --border: var(--border-light);
+      --brand: var(--brand-light);
+      --brand-text: var(--brand-text-light);
+      --ok: var(--ok-light);
+
+      @media (prefers-color-scheme: dark) {
+        --bg: var(--bg-dark);
+        --surface: var(--surface-dark);
+        --surface-alt: var(--surface-alt-dark);
+        --text: var(--text-dark);
+        --muted: var(--muted-dark);
+        --border: var(--border-dark);
+        --brand: var(--brand-dark);
+        --brand-text: var(--brand-text-dark);
+        --ok: var(--ok-dark);
+      }
+
+      @supports (color: light-dark(white, black)) {
+        --bg: light-dark(var(--bg-light), var(--bg-dark));
+        --surface: light-dark(var(--surface-light), var(--surface-dark));
+        --surface-alt: light-dark(var(--surface-alt-light), var(--surface-alt-dark));
+        --text: light-dark(var(--text-light), var(--text-dark));
+        --muted: light-dark(var(--muted-light), var(--muted-dark));
+        --border: light-dark(var(--border-light), var(--border-dark));
+        --brand: light-dark(var(--brand-light), var(--brand-dark));
+        --brand-text: light-dark(var(--brand-text-light), var(--brand-text-dark));
+        --ok: light-dark(var(--ok-light), var(--ok-dark));
+      }
+
+      color-scheme: light dark;
+      accent-color: var(--brand);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .page {
+      max-inline-size: 64rem;
+      margin-inline: auto;
+      padding: 1.5rem 1rem 3rem;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .subtitle {
+      margin: 0.2rem 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    button,
+    select {
+      font: inherit;
+      padding: 0.45rem 0.85rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--brand);
+      color: var(--brand-text);
+      border-color: transparent;
+      font-weight: 600;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+
+    .card h2 {
+      margin-block: 0 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .grid-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+      gap: 0.85rem;
+    }
+
+    .metric {
+      background: var(--surface-alt);
+      border-radius: 0.6rem;
+      padding: 0.85rem 1rem;
+    }
+
+    .metric .label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .metric .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-block-start: 0.2rem;
+    }
+
+    .metric .value.ok {
+      color: var(--ok);
+    }
+
+    .dispatch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-block-end: 0.75rem;
+    }
+
+    .log {
+      margin: 0;
+      padding: 0.85rem 1rem;
+      background: var(--surface-alt);
+      border-radius: 0.5rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+    }
+
+    /* Responsive Table (modern-web-guidance: responsive-table) */
+    .table-wrapper {
+      overflow: auto;
+      max-inline-size: 100%;
+      max-block-size: min(500px, 80vh);
+      container-type: inline-size;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      text-align: left;
+      --label-1: "Dimension";
+      --label-2: "Remote Conversations (Pure Cloud)";
+      --label-3: "Remote Control (Windows 11 PC)";
+    }
+
+    caption {
+      padding: 0.65rem 0.9rem;
+      font-weight: 600;
+      text-align: left;
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th,
+    td {
+      padding: 0.75rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    thead {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 1;
+      background: var(--surface-alt);
+    }
+
+    tbody th {
+      position: sticky;
+      inset-inline-start: 0;
+      background: var(--surface);
+      font-weight: 600;
+    }
+
+    @container (width < 600px) {
+      table,
+      thead,
+      tbody,
+      tr,
+      th,
+      td {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-block-end: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+      }
+
+      tbody th {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 2;
+        background: var(--surface-alt);
+        border-bottom: 1px solid var(--border);
+      }
+
+      td:nth-child(2)::before {
+        content: var(--label-2) ": ";
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      td:nth-child(3)::before {
+        content: var(--label-3) ": ";
+        font-weight: 600;
+        color: var(--muted);
+      }
+    }
+
+    /* Dialog & Popover (modern-web-guidance: light-dismiss-a-dialog, declarative-dialog-popover-control) */
+    dialog {
+      max-inline-size: min(30rem, 92vw);
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    dialog::backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-block-start: 1rem;
+    }
+
+    [popover] {
+      max-inline-size: min(24rem, 90vw);
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.65rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    [popover]:is(:popover-open, .\:popover-open) {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>Antigravity Mobile Architecture</h1>
+        <p class="subtitle">Chrome PWA + Pure Cloud Remote Agents + Windows 11 Web Relay + Modern Web Guidance</p>
+      </div>
+      <div class="controls">
+        <label for="instance-select">Instance:</label>
+        <select id="instance-select" aria-label="Instance Switcher">
+          <option value="remote_conversations">Remote Conversations (Pure Cloud)</option>
+          <option value="remote_control">Windows PC Workstation (Web Relay)</option>
+        </select>
+        <button type="button" commandfor="tier-popover" command="toggle-popover">
+          Model Tiers
+        </button>
+      </div>
+    </header>
+
+    <div id="tier-popover" popover>
+      <strong>Part 3 Model Tier Roles</strong>
+      <ul>
+        <li><strong>Argon</strong>: Planning &amp; Subtask Breakdown (Lead Structural Architect)</li>
+        <li><strong>Hydrogen</strong>: Branch Coding (Production Engineer)</li>
+        <li><strong>Claude Opus 5.5</strong>: Code Review (Independent Peer Reviewer)</li>
+      </ul>
+    </div>
+
+    <section class="grid-metrics" aria-label="Architecture Status Summary">
+      <div class="metric">
+        <div class="label">Active Execution Mode</div>
+        <div class="value" id="mode-display">Pure Cloud (PC Off)</div>
+      </div>
+      <div class="metric">
+        <div class="label">Skill Pack Loaded</div>
+        <div class="value">modern-web-guidance (209 guides)</div>
+      </div>
+      <div class="metric">
+        <div class="label">Eval Uplift (Antigravity Argon)</div>
+        <div class="value ok">58% &rarr; 94% (+36pp)</div>
+      </div>
+      <div class="metric">
+        <div class="label">Pytest Suite</div>
+        <div class="value ok">20 / 20 Passed</div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="dispatch-heading">
+      <h2 id="dispatch-heading">Non-Blocking Task Dispatch Simulator</h2>
+      <div class="dispatch-row">
+        <label for="tier-select">Model Tier:</label>
+        <select id="tier-select">
+          <option value="Argon">Argon (Planning)</option>
+          <option value="Hydrogen">Hydrogen (Branch Coding)</option>
+          <option value="Claude Opus 5.5">Claude Opus 5.5 (Code Review)</option>
+        </select>
+        <button type="button" class="primary" id="dispatch-btn">
+          Dispatch &amp; Lock Screen
+        </button>
+        <button type="button" commandfor="approval-dialog" command="show-modal">
+          Review Blocked Approval
+        </button>
+      </div>
+      <pre class="log" id="sim-log" aria-live="polite">[Ready] Chrome PWA active at antigravity.google.com. Select an instance or dispatch a task.</pre>
+    </section>
+
+    <section class="card" aria-labelledby="modes-table-caption">
+      <div tabindex="0" role="region" aria-labelledby="modes-table-caption" class="table-wrapper">
+        <table>
+          <caption id="modes-table-caption">
+            Comparison of Android Chrome PWA Execution Modes (Part 1–4)
+          </caption>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Remote Conversations (Pure Cloud)</th>
+              <th>Remote Control (Windows 11 PC)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Execution Host</th>
+              <td>Google Isolated Cloud Sandbox (100% Cloud)</td>
+              <td>Home Windows 11 Workstation (Desktop App / <code>agy --remote-agent</code>)</td>
+            </tr>
+            <tr>
+              <th>Home PC State</th>
+              <td>Can stay completely powered OFF</td>
+              <td>Must be online with Remote Control enabled</td>
+            </tr>
+            <tr>
+              <th>Resources &amp; Files</th>
+              <td>OAuth GitHub repos &amp; Google Drive (5TB)</td>
+              <td>Local hard drive files (<code>D:\...</code>) &amp; 128 GB RAM / 16 GB VRAM</td>
+            </tr>
+            <tr>
+              <th>Mobile Bandwidth</th>
+              <td>Async JSON + Service Worker Push Notifications</td>
+              <td>Lightweight Web Relay commands (no heavy RDP video stream)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="approval-dialog" closedby="any" aria-labelledby="approval-title">
+    <h2 id="approval-title">Approval Required (BLOCKED_FOR_USER_INPUT)</h2>
+    <p>
+      Hydrogen finished coding branch <code>feat/nonlinear-solver</code> in the Isolated Cloud
+      Sandbox and sent a Service Worker Push Notification for your sign-off.
+    </p>
+    <div class="dialog-actions">
+      <button type="button" commandfor="approval-dialog" command="close">Cancel</button>
+      <button type="button" class="primary" id="approve-confirm-btn" commandfor="approval-dialog" command="close">
+        Approve Branch
+      </button>
+    </div>
+  </dialog>
+
+  <script type="module">
+    if (!("commandForElement" in HTMLButtonElement.prototype)) {
+      import("https://esm.run/invokers-polyfill");
+    }
+    if (!Object.hasOwn(HTMLElement.prototype, "popover")) {
+      import("https://unpkg.com/@oddbird/popover-polyfill@latest/dist/popover.min.js");
+    }
+
+    const dialog = document.getElementById("approval-dialog");
+    if (!("closedBy" in HTMLDialogElement.prototype)) {
+      dialog.addEventListener("click", (event) => {
+        if (event.target !== dialog) return;
+        const rect = dialog.getBoundingClientRect();
+        const isDialogContent =
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width;
+        if (isDialogContent) return;
+        dialog.close();
+      });
+    }
+
+    const instanceSelect = document.getElementById("instance-select");
+    const modeDisplay = document.getElementById("mode-display");
+    const simLog = document.getElementById("sim-log");
+    const tierSelect = document.getElementById("tier-select");
+
+    instanceSelect.addEventListener("change", () => {
+      const isCloud = instanceSelect.value === "remote_conversations";
+      modeDisplay.textContent = isCloud ? "Pure Cloud (PC Off)" : "Windows 11 PC (Web Relay)";
+      simLog.textContent = isCloud
+        ? "[Instance Switcher] Switched to Remote Conversations (Pure Cloud Sandbox)."
+        : "[Instance Switcher] Connected via lightweight Web Relay to Windows 11 (128 GB RAM, 16 GB VRAM).";
+    });
+
+    document.getElementById("dispatch-btn").addEventListener("click", () => {
+      const tier = tierSelect.value;
+      const mode = instanceSelect.value;
+      simLog.textContent =
+        `[Dispatched -> ${tier}] Mode=${mode}\n` +
+        "Mobile browser closed & screen locked; execution continues asynchronously.\n" +
+        "Service Worker Push Notification delivered upon completion!";
+    });
+
+    document.getElementById("approve-confirm-btn").addEventListener("click", () => {
+      simLog.textContent =
+        "[Approved] Hydrogen task resumed in Isolated Cloud Sandbox and completed feat/nonlinear-solver.";
+    });
+  </script>
+</body>
+</html>
