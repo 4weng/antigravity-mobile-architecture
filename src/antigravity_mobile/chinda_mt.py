@@ -598,9 +598,7 @@ def get_domain_glossary(
     direction: Direction = "en2th",
 ) -> dict[str, str]:
     """Return a merged glossary for one or more specialized domains."""
-    domain_list: list[GlossaryDomain] = (
-        [domains] if isinstance(domains, str) else list(domains)
-    )
+    domain_list: list[GlossaryDomain] = [domains] if isinstance(domains, str) else list(domains)
     merged: dict[str, str] = {}
     for dom in domain_list:
         if dom in ("engineering", "civil_engineering", "all"):
@@ -732,8 +730,8 @@ _ANTI_TRANSLITERATION_RULE: dict[Direction, str] = {
 }
 
 _HTML_PRESERVATION_RULE = (
-    "Preserve all HTML tags, attributes, and structure (e.g., <div class=\"...\">, "
-    "<a href=\"...\">, <strong>, <code>, <br/>) exactly as written; "
+    'Preserve all HTML tags, attributes, and structure (e.g., <div class="...">, '
+    '<a href="...">, <strong>, <code>, <br/>) exactly as written; '
     "translate only the human-readable text content"
 )
 
@@ -1073,8 +1071,7 @@ class ChindaTranslator:
                     matched_pairs.append(f'"{src_term}" = "{tgt_term}"')
             if matched_pairs:
                 _add_rule(
-                    "Strictly use this glossary (do not transliterate): "
-                    + ", ".join(matched_pairs)
+                    "Strictly use this glossary (do not transliterate): " + ", ".join(matched_pairs)
                 )
 
         # 3. HTML & Markdown tag preservation rules
@@ -1367,9 +1364,7 @@ def run_chinda_demo(translator: ChindaTranslator | None = None) -> None:
     print(f"  out: {thai}\n")
 
     # --- reverse direction ---
-    back = translator.translate(
-        thai, direction="th2en", rules=["Return only the translated text"]
-    )
+    back = translator.translate(thai, direction="th2en", rules=["Return only the translated text"])
     print("TH → EN")
     print(f"  src: {thai}")
     print(f"  out: {back}\n")

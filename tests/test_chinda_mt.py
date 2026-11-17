@@ -295,8 +295,7 @@ def test_translator_load_and_translate_pipeline_with_fake_torch_and_transformers
     doc = "Paragraph one is quite long here.\n\n\n\nParagraph two is also quite long here."
     doc_out = translator.translate(doc)
     assert doc_out == (
-        "[TH:Paragraph one is quite long here.]\n\n\n\n"
-        "[TH:Paragraph two is also quite long here.]"
+        "[TH:Paragraph one is quite long here.]\n\n\n\n[TH:Paragraph two is also quite long here.]"
     )
 
     # Full demo smoke test
@@ -512,9 +511,7 @@ def test_thai_civil_law_and_criminal_law_glossaries_and_legal_preset() -> None:
 
 def test_thai_civil_procedure_criminal_procedure_and_fidic_glossaries() -> None:
     # 1. Civil Procedure Code (กฎหมายวิธีพิจารณาความแพ่ง)
-    civ_proc_cfg = TranslatorConfig.formal_legal_preset(
-        direction="en2th", domain="civil_procedure"
-    )
+    civ_proc_cfg = TranslatorConfig.formal_legal_preset(direction="en2th", domain="civil_procedure")
     civ_proc_translator = ChindaTranslator(civ_proc_cfg)
     civ_proc_src = (
         "The plaintiff filed a plaint and an application for an injunction, while the "
@@ -550,9 +547,7 @@ def test_thai_civil_procedure_criminal_procedure_and_fidic_glossaries() -> None:
     assert '"alleged offender" = "ผู้ต้องหา"' in crim_proc_prompt
     assert '"provisional release" = "การปล่อยชั่วคราว"' in crim_proc_prompt
     assert DEFAULT_CRIMINAL_PROCEDURE_GLOSSARY_EN2TH["warrant of arrest"] == "หมายจับ"
-    assert (
-        DEFAULT_CRIMINAL_PROCEDURE_GLOSSARY_TH2EN["การไต่สวนมูลฟ้อง"] == "preliminary examination"
-    )
+    assert DEFAULT_CRIMINAL_PROCEDURE_GLOSSARY_TH2EN["การไต่สวนมูลฟ้อง"] == "preliminary examination"
     assert "warrant of arrest" in DEFAULT_PROCEDURAL_LAW_GLOSSARY_EN2TH
     assert "counterclaim" in DEFAULT_PROCEDURAL_LAW_GLOSSARY_EN2TH
 
@@ -569,18 +564,11 @@ def test_thai_civil_procedure_criminal_procedure_and_fidic_glossaries() -> None:
     assert '"contractor" = "ผู้รับจ้าง"' in fidic_prompt
     assert '"notice of claim" = "หนังสือแจ้งการใช้สิทธิเรียกร้อง"' in fidic_prompt
     assert '"extension of time" = "การขยายระยะเวลาก่อสร้าง"' in fidic_prompt
-    assert (
-        '"interim payment certificate" = "หนังสือรับรองการจ่ายเงินงวดระหว่างกาล"' in fidic_prompt
-    )
+    assert '"interim payment certificate" = "หนังสือรับรองการจ่ายเงินงวดระหว่างกาล"' in fidic_prompt
     assert '"the engineer" = "วิศวกรผู้ควบคุมงาน"' in fidic_prompt
     assert '"taking-over certificate" = "หนังสือรับรองการรับมอบงาน"' in fidic_prompt
-    assert (
-        '"defects notification period" = "ระยะเวลารับประกันความชำรุดบกพร่อง"' in fidic_prompt
-    )
-    assert (
-        DEFAULT_FIDIC_CONTRACT_GLOSSARY_EN2TH["bill of quantities"]
-        == "บัญชีแสดงปริมาณงานและราคา"
-    )
+    assert '"defects notification period" = "ระยะเวลารับประกันความชำรุดบกพร่อง"' in fidic_prompt
+    assert DEFAULT_FIDIC_CONTRACT_GLOSSARY_EN2TH["bill of quantities"] == "บัญชีแสดงปริมาณงานและราคา"
     assert DEFAULT_FIDIC_CONTRACT_GLOSSARY_TH2EN["เงินประกันผลงานหักสะสม"] == "retention money"
 
 
@@ -617,12 +605,8 @@ def test_civil_engineering_and_computer_science_glossaries() -> None:
     assert '"deadlock" = "ภาวะติดตาย"' in comp_prompt
     assert '"race condition" = "ภาวะแข่งขัน"' in comp_prompt
     assert '"concurrency" = "การทำงานพร้อมกัน"' in comp_prompt
-    assert (
-        '"retrieval-augmented generation" = "การสร้างข้อความเสริมด้วยการค้นคืน"' in comp_prompt
-    )
-    assert (
-        '"quantization" = "การลดทอนความละเอียดของค่าถ่วงน้ำหนัก"' in comp_prompt
-    )
+    assert '"retrieval-augmented generation" = "การสร้างข้อความเสริมด้วยการค้นคืน"' in comp_prompt
+    assert '"quantization" = "การลดทอนความละเอียดของค่าถ่วงน้ำหนัก"' in comp_prompt
     assert '"large language model" = "โมเดลภาษาขนาดใหญ่"' in comp_prompt
     assert DEFAULT_COMPUTER_GLOSSARY_EN2TH["binary search tree"] == "ต้นไม้ค้นหาแบบทวิภาค"
     assert DEFAULT_COMPUTER_GLOSSARY_TH2EN["การฉีดพึ่งพา"] == "dependency injection"
