@@ -28,6 +28,9 @@ def test_full_end_to_end_simulation_demo() -> None:
     assert sim.pwa.active_mode == ExecutionMode.REMOTE_CONTROL
     assert report.remote_control_result.workload_name == "drone-crack-inspection"
     assert report.remote_control_result.bandwidth_mode == "lightweight_command_relay"
+    assert report.chinda_translation_result is not None
+    assert report.chinda_translation_result.workload_name == "ChindaMT-4B-translation"
+    assert "iapp/ChindaMT-4B" in report.chinda_translation_result.output_summary
 
     # Push notifications: Argon complete, Hydrogen approval & complete,
     # Opus complete, and Remote Control complete

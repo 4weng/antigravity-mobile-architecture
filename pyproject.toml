@@ -17,9 +17,15 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.11",
 ]
+chinda = [
+    "torch>=2.1",
+    "transformers>=5.2",
+    "accelerate>=0.27",
+]
 
 [project.scripts]
 antigravity-sim = "antigravity_mobile.simulator:main"
+chinda-mt = "antigravity_mobile.chinda_mt:run_chinda_demo"
 
 [tool.setuptools.packages.find]
 where = ["src"]

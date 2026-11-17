@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from .chinda_mt import ChindaTranslator, Direction, TranslatorConfig
 from .models import (
     ExecutionMode,
     PushNotification,
@@ -69,6 +71,57 @@ class Windows11Workstation:
             bandwidth_mode="lightweight_command_relay",
         )
 
+    def run_chinda_translation(
+        self,
+        text: str,
+        *,
+        direction: Direction | None = None,
+        rules: Sequence[str] | None = None,
+        config: TranslatorConfig | None = None,
+        translator: ChindaTranslator | None = None,
+        weights_path: str = r"D:\models\ChindaMT-4B\weights.safetensors",
+    ) -> WorkloadResult:
+        """Configure and run ChindaMT-4B (Thai-English) on the Windows 11 GPU workstation."""
+        if not self.remote_control_enabled:
+            raise WorkstationOfflineError(
+                f"Workstation '{self.hostname}' is offline or Remote Control is not enabled."
+            )
+
+        active_translator = translator or ChindaTranslator(config)
+        cfg = active_translator.config
+        active_direction: Direction = direction or cfg.direction
+        chunks = [c for c in active_translator.chunk_text(text) if c.strip()]
+        prompt_preview = active_translator.build_prompt(
+            chunks[0] if chunks else text,
+            direction=active_direction,
+            rules=rules,
+        )
+
+        if active_translator.model is not None and active_translator.tokenizer is not None:
+            translated_output = active_translator.translate(
+                text, direction=active_direction, rules=rules
+            )
+        else:
+            translated_output = (
+                f"[{cfg.model_id} {active_direction} ({cfg.torch_dtype}) "
+                f"translated {len(chunks)} chunk(s)]"
+            )
+
+        vram_needed = 4 if cfg.load_in_4bit else 9
+        return WorkloadResult(
+            workload_name="ChindaMT-4B-translation",
+            input_path=weights_path,
+            used_ram_gb=min(16, self.spec.ram_gb),
+            used_vram_gb=min(vram_needed, self.spec.vram_gb),
+            output_summary=(
+                f"Executed '{cfg.model_id}' ({active_direction}, {cfg.torch_dtype}, "
+                f"chunks={len(chunks)}) on {self.spec.os_name} "
+                f"({self.spec.ram_gb} GB RAM, {self.spec.gpu_name} {self.spec.vram_gb} GB VRAM) "
+                f"-> {translated_output} | Prompt: {prompt_preview.splitlines()[0]}"
+            ),
+            bandwidth_mode="lightweight_command_relay",
+        )
+
 
 @dataclass
 class WebRelay:
@@ -107,6 +160,39 @@ class WebRelay:
                 PushNotification(
                     task_id=f"rc-{workload_name}",
                     title=f"Remote Control Completed: {workload_name}",
+                    body=result.output_summary,
+                    action_required=False,
+                    mode=ExecutionMode.REMOTE_CONTROL,
+                )
+            )
+        return result
+
+    def dispatch_chinda_translation(
+        self,
+        workstation: Windows11Workstation,
+        text: str,
+        *,
+        direction: Direction | None = None,
+        rules: Sequence[str] | None = None,
+        config: TranslatorConfig | None = None,
+        translator: ChindaTranslator | None = None,
+        service_worker: ServiceWorker | None = None,
+    ) -> WorkloadResult:
+        """Dispatch a ChindaMT-4B Thai-English translation job over Web Relay."""
+        self.verify_connection(workstation)
+        result = workstation.run_chinda_translation(
+            text=text,
+            direction=direction,
+            rules=rules,
+            config=config,
+            translator=translator,
+        )
+
+        if service_worker is not None and service_worker.active:
+            service_worker.receive_push(
+                PushNotification(
+                    task_id="rc-ChindaMT-4B-translation",
+                    title="Remote Control Completed: ChindaMT-4B-translation",
                     body=result.output_summary,
                     action_required=False,
                     mode=ExecutionMode.REMOTE_CONTROL,

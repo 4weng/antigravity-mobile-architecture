@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from .chinda_mt import TranslatorConfig
 from .cloud_project import CloudTask, NonBlockingDispatcher, RemoteProject
 from .models import (
     DeviceHardware,
@@ -30,6 +31,7 @@ class SimulationReport:
     remote_control_result: WorkloadResult
     push_notifications_received: int
     guidance_eval: EvalBenchmarkResult | None = None
+    chinda_translation_result: WorkloadResult | None = None
 
 
 @dataclass
@@ -128,6 +130,19 @@ class AntigravityMobileSimulator:
             input_path=r"D:\drone_inspections\tower_b_cracks.raw",
             service_worker=self.pwa.service_worker,
         )
+        chinda_result = self.relay.dispatch_chinda_translation(
+            workstation=self.workstation,
+            text=(
+                "The **shear wall** and <code>prestressed concrete</code> passed "
+                "[seismic load](https://example.com/spec) inspection."
+            ),
+            config=TranslatorConfig.formal_engineering_preset(
+                direction="en2th",
+                tone="official_report",
+                preserve_html_tags=True,
+                preserve_markdown=True,
+            ),
+        )
 
         # Skill Pack Eval Harness (modern-web-guidance closed-loop calibration & uplift)
         eval_tasks = [
@@ -171,6 +186,7 @@ class AntigravityMobileSimulator:
             remote_control_result=rc_result,
             push_notifications_received=len(self.pwa.service_worker.notifications),
             guidance_eval=guidance_eval,
+            chinda_translation_result=chinda_result,
         )
 
 
@@ -196,6 +212,11 @@ def main() -> None:
         f"Part 4 - Remote Control ({report.remote_control_result.bandwidth_mode}): "
         f"{report.remote_control_result.output_summary}"
     )
+    if report.chinda_translation_result is not None:
+        print(
+            f"Part 4 - ChindaMT-4B ({report.chinda_translation_result.bandwidth_mode}): "
+            f"{report.chinda_translation_result.output_summary}"
+        )
     if report.guidance_eval is not None:
         ev = report.guidance_eval
         print(
