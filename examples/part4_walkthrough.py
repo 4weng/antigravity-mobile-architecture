@@ -153,7 +153,10 @@ def main() -> int:
         "แปลว่าคำสั่งจากแชตมือถือจะถูกส่งผ่าน Web Relay ไปที่ PC บ้าน",
         "Chat commands go over lightweight Web Relay (not full RDP pixel streaming)",
     )
-    explain(f"Relay endpoint: {relay.relay_endpoint} | pixel streaming? {relay.pixel_streaming_enabled}")
+    explain(
+        f"Relay endpoint: {relay.relay_endpoint} | "
+        f"pixel streaming? {relay.pixel_streaming_enabled}"
+    )
 
     # ------------------------------------------------------------------
     banner(
