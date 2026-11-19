@@ -100,9 +100,7 @@ def main() -> int:
     )
     phone = AndroidChromePWA()
     phone.open_chrome(ANTIGRAVITY_WEB_URL)
-    phone.sign_in(
-        GoogleAccount(email="student@example.com", plan=SubscriptionPlan.GOOGLE_AI_ULTRA)
-    )
+    phone.sign_in(GoogleAccount(email="student@example.com", plan=SubscriptionPlan.GOOGLE_AI_ULTRA))
     phone.install_to_home_screen()
     relay = WebRelay()
     explain(
@@ -154,8 +152,7 @@ def main() -> int:
         "Chat commands go over lightweight Web Relay (not full RDP pixel streaming)",
     )
     explain(
-        f"Relay endpoint: {relay.relay_endpoint} | "
-        f"pixel streaming? {relay.pixel_streaming_enabled}"
+        f"Relay endpoint: {relay.relay_endpoint} | pixel streaming? {relay.pixel_streaming_enabled}"
     )
 
     # ------------------------------------------------------------------
